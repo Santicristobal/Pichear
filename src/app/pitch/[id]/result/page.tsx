@@ -1,6 +1,7 @@
 import { getSupabase } from "@/lib/supabase";
 import type { Pitch, Evaluation, Result, Verdict, AgentType } from "@/lib/types";
 import type { Metadata } from "next";
+import EmailForm from "./EmailForm";
 
 // --- Metadata (OG tags) ---
 
@@ -79,40 +80,6 @@ function agentVerdictBadge(verdict: Verdict) {
   );
 }
 
-// --- Email form (client island) ---
-// We use a simple HTML form that POSTs to the API since this is a server component.
-// For a better UX you could extract this into a client component.
-
-function EmailForm({ pitchId }: { pitchId: string }) {
-  return (
-    <form
-      action="/api/email"
-      method="POST"
-      className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-end"
-    >
-      <input type="hidden" name="pitchId" value={pitchId} />
-      <div className="flex-1">
-        <label htmlFor="email" className="mb-1 block text-sm text-zinc-400">
-          Dejanos tu email
-        </label>
-        <input
-          id="email"
-          name="email"
-          type="email"
-          required
-          placeholder="tu@email.com"
-          className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-2 text-white placeholder-zinc-500 focus:border-green-500 focus:outline-none"
-        />
-      </div>
-      <button
-        type="submit"
-        className="rounded-lg bg-green-600 px-6 py-2 font-semibold text-white hover:bg-green-500 transition-colors"
-      >
-        Enviar
-      </button>
-    </form>
-  );
-}
 
 // --- Page ---
 
