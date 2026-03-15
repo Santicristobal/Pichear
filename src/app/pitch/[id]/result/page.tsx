@@ -2,6 +2,7 @@ import { getSupabase } from "@/lib/supabase";
 import type { Pitch, Evaluation, Result, Verdict, AgentType } from "@/lib/types";
 import type { Metadata } from "next";
 import EmailForm from "./EmailForm";
+import ShareGate from "./ShareGate";
 
 // --- Metadata (OG tags) ---
 
@@ -112,11 +113,7 @@ export default async function ResultPage({ params }: PageProps) {
     .map((a) => evaluations.find((e) => e.agent_type === a))
     .filter(Boolean) as Evaluation[];
 
-  // Share URLs
-  const shareText = `Mi startup "${pitch.startup_name}" sacó ${result.final_score}/100 en Roast My Startup`;
   const shareUrl = typeof result.share_url === "string" ? result.share_url : "";
-  const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
-  const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`;
 
   return (
     <main className="min-h-screen bg-zinc-950 text-white">
@@ -144,143 +141,120 @@ export default async function ResultPage({ params }: PageProps) {
           </div>
         )}
 
-        {/* Agent cards */}
-        <section className="mt-12 grid gap-6 sm:grid-cols-3">
-          {sortedEvals.map((ev) => {
-            const cfg = AGENT_CONFIG[ev.agent_type];
-            return (
-              <div
-                key={ev.id}
-                className={`rounded-xl border-t-4 ${cfg.color} bg-zinc-900 p-5`}
-              >
-                <div className="mb-3 flex items-center gap-2">
-                  <span className="text-2xl">{cfg.emoji}</span>
-                  <h3 className="font-bold">{cfg.label}</h3>
-                </div>
+        {/* Gated content: share to unlock */}
+        <ShareGate pitchId={id} startupName={pitch.startup_name} shareUrl={shareUrl}>
+          {/* Agent cards */}
+          <section className="grid gap-6 sm:grid-cols-3">
+            {sortedEvals.map((ev) => {
+              const cfg = AGENT_CONFIG[ev.agent_type];
+              return (
+                <div
+                  key={ev.id}
+                  className={`rounded-xl border-t-4 ${cfg.color} bg-zinc-900 p-5`}
+                >
+                  <div className="mb-3 flex items-center gap-2">
+                    <span className="text-2xl">{cfg.emoji}</span>
+                    <h3 className="font-bold">{cfg.label}</h3>
+                  </div>
 
-                <div className="mb-3">{agentVerdictBadge(ev.verdict)}</div>
+                  <div className="mb-3">{agentVerdictBadge(ev.verdict)}</div>
 
-                {/* Roast (el párrafo con personalidad) */}
-                {ev.roast && (
-                  <p className="mb-4 text-sm leading-relaxed text-zinc-200">{ev.roast}</p>
-                )}
+                  {ev.roast && (
+                    <p className="mb-4 text-sm leading-relaxed text-zinc-200">{ev.roast}</p>
+                  )}
 
-                {/* Justificación fría debajo */}
-                <p className="mb-4 text-xs text-zinc-500 italic">{ev.justification}</p>
+                  <p className="mb-4 text-xs text-zinc-500 italic">{ev.justification}</p>
 
-                {/* Dimension scores as small bars */}
-                <div className="space-y-2">
-                  {Object.entries(ev.dimension_scores).map(([dim, score]) => (
-                    <div key={dim}>
-                      <div className="mb-0.5 flex justify-between text-xs text-zinc-400">
-                        <span className="capitalize">{dim.replace(/_/g, " ")}</span>
-                        <span>{score}/10</span>
+                  <div className="space-y-2">
+                    {Object.entries(ev.dimension_scores).map(([dim, score]) => (
+                      <div key={dim}>
+                        <div className="mb-0.5 flex justify-between text-xs text-zinc-400">
+                          <span className="capitalize">{dim.replace(/_/g, " ")}</span>
+                          <span>{score}/10</span>
+                        </div>
+                        <div className="h-1.5 w-full rounded-full bg-zinc-700">
+                          <div
+                            className="h-full rounded-full bg-gradient-to-r from-red-500 via-yellow-400 to-green-400"
+                            style={{ width: `${Math.min(score * 10, 100)}%` }}
+                          />
+                        </div>
                       </div>
-                      <div className="h-1.5 w-full rounded-full bg-zinc-700">
-                        <div
-                          className="h-full rounded-full bg-gradient-to-r from-red-500 via-yellow-400 to-green-400"
-                          style={{ width: `${Math.min(score * 10, 100)}%` }}
-                        />
-                      </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </section>
-
-        {/* Strengths */}
-        {result.strengths.length > 0 && (
-          <section className="mt-10">
-            <h2 className="mb-3 text-lg font-bold">Fortalezas</h2>
-            <ul className="space-y-1">
-              {result.strengths.map((s, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm text-zinc-300">
-                  <span className="mt-0.5 text-green-400">&bull;</span>
-                  {s}
-                </li>
-              ))}
-            </ul>
+              );
+            })}
           </section>
-        )}
 
-        {/* Weaknesses */}
-        {result.weaknesses.length > 0 && (
-          <section className="mt-8">
-            <h2 className="mb-3 text-lg font-bold">Debilidades</h2>
-            <ul className="space-y-1">
-              {result.weaknesses.map((w, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm text-zinc-300">
-                  <span className="mt-0.5 text-red-400">&bull;</span>
-                  {w}
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
-
-        {/* Recommendation */}
-        <section className="mt-8 rounded-xl bg-zinc-900 p-6">
-          <h2 className="mb-2 text-lg font-bold">Recomendacion</h2>
-          <p className="text-sm leading-relaxed text-zinc-300">
-            {result.recommendation}
-          </p>
-        </section>
-
-        {/* CTA section */}
-        <section className="mt-10 rounded-xl bg-zinc-900 p-6">
-          {result.approved ? (
-            <>
-              <p className="text-zinc-300">
-                Tu startup paso el roast. Si queres conectar con el ecosistema
-                builder de LATAM, dejanos tu email.
-              </p>
-              <EmailForm pitchId={id} />
-              <a
-                href="https://crecimiento.build"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-4 inline-block text-sm text-green-400 underline hover:text-green-300"
-              >
-                Conoce Crecimiento
-              </a>
-            </>
-          ) : (
-            <>
-              <p className="text-zinc-300">
-                No te rindas. Usa el feedback para mejorar tu pitch y volve a
-                intentarlo.
-              </p>
-              <a
-                href="/pitch"
-                className="mt-4 inline-block rounded-lg bg-zinc-700 px-6 py-2 font-semibold text-white hover:bg-zinc-600 transition-colors"
-              >
-                Intentar de nuevo
-              </a>
-            </>
+          {result.strengths.length > 0 && (
+            <section className="mt-10">
+              <h2 className="mb-3 text-lg font-bold">Fortalezas</h2>
+              <ul className="space-y-1">
+                {result.strengths.map((s, i) => (
+                  <li key={i} className="flex items-start gap-2 text-sm text-zinc-300">
+                    <span className="mt-0.5 text-green-400">&bull;</span>
+                    {s}
+                  </li>
+                ))}
+              </ul>
+            </section>
           )}
-        </section>
 
-        {/* Share buttons */}
-        <div className="mt-8 flex justify-center gap-4">
-          <a
-            href={twitterUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="rounded-lg bg-zinc-800 px-5 py-2 text-sm font-medium text-white hover:bg-zinc-700 transition-colors"
-          >
-            Compartir en Twitter
-          </a>
-          <a
-            href={linkedinUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="rounded-lg bg-zinc-800 px-5 py-2 text-sm font-medium text-white hover:bg-zinc-700 transition-colors"
-          >
-            Compartir en LinkedIn
-          </a>
-        </div>
+          {result.weaknesses.length > 0 && (
+            <section className="mt-8">
+              <h2 className="mb-3 text-lg font-bold">Debilidades</h2>
+              <ul className="space-y-1">
+                {result.weaknesses.map((w, i) => (
+                  <li key={i} className="flex items-start gap-2 text-sm text-zinc-300">
+                    <span className="mt-0.5 text-red-400">&bull;</span>
+                    {w}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          <section className="mt-8 rounded-xl bg-zinc-900 p-6">
+            <h2 className="mb-2 text-lg font-bold">Recomendacion</h2>
+            <p className="text-sm leading-relaxed text-zinc-300">
+              {result.recommendation}
+            </p>
+          </section>
+
+          {/* CTA section */}
+          <section className="mt-10 rounded-xl bg-zinc-900 p-6">
+            {result.approved ? (
+              <>
+                <p className="text-zinc-300">
+                  Tu startup paso el roast. Si queres conectar con el ecosistema
+                  builder de LATAM, dejanos tu email.
+                </p>
+                <EmailForm pitchId={id} />
+                <a
+                  href="https://crecimiento.build"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-4 inline-block text-sm text-green-400 underline hover:text-green-300"
+                >
+                  Conoce Crecimiento
+                </a>
+              </>
+            ) : (
+              <>
+                <p className="text-zinc-300">
+                  No te rindas. Usa el feedback para mejorar tu pitch y volve a
+                  intentarlo.
+                </p>
+                <a
+                  href="/pitch"
+                  className="mt-4 inline-block rounded-lg bg-zinc-700 px-6 py-2 font-semibold text-white hover:bg-zinc-600 transition-colors"
+                >
+                  Intentar de nuevo
+                </a>
+              </>
+            )}
+          </section>
+        </ShareGate>
       </div>
     </main>
   );
