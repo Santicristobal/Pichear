@@ -92,11 +92,9 @@ export function formatPitchAsText(pitch: PitchFormData): string {
     `País: ${pitch.country}`,
   ];
 
-  // Campos opcionales (se agregan cuando se implemente el formulario extendido)
-  const optional = pitch as unknown as Record<string, unknown>;
-  if (optional.business_model) lines.push(`Modelo de negocio: ${optional.business_model}`);
-  if (optional.metrics) lines.push(`Métricas: ${optional.metrics}`);
-  if (optional.competitors) lines.push(`Competidores: ${optional.competitors}`);
+  if (pitch.business_model) lines.push(`Modelo de negocio: ${pitch.business_model}`);
+  if (pitch.metrics) lines.push(`Métricas: ${pitch.metrics}`);
+  if (pitch.competitors) lines.push(`Competidores: ${pitch.competitors}`);
 
   return lines.join("\n");
 }

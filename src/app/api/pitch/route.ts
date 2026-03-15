@@ -40,6 +40,9 @@ export async function POST(req: NextRequest) {
       vertical: body.vertical.trim(),
       stage: body.stage.trim(),
       country: body.country.trim(),
+      business_model: (body.business_model || "").trim(),
+      metrics: (body.metrics || "").trim(),
+      competitors: (body.competitors || "").trim(),
     };
 
     const { data, error } = await supabase

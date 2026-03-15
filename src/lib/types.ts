@@ -23,6 +23,9 @@ export interface Pitch {
   vertical: Vertical;
   stage: Stage;
   country: string;
+  business_model: string;
+  metrics: string;
+  competitors: string;
   created_at: string;
 }
 
@@ -61,4 +64,7 @@ export interface PitchFormData {
   vertical: Vertical | "";
   stage: Stage | "";
   country: string;
+  business_model: string;
+  metrics: string;
+  competitors: string;
 }

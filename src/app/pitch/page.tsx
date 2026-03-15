@@ -32,6 +32,9 @@ export default function PitchPage() {
     vertical: "",
     stage: "",
     country: "Argentina",
+    business_model: "",
+    metrics: "",
+    competitors: "",
   });
 
   const [errors, setErrors] = useState<Partial<Record<keyof PitchFormData, string>>>({});
@@ -199,6 +202,51 @@ export default function PitchPage() {
               placeholder="Quienes forman el equipo?"
             />
           </Field>
+
+          {/* Separador visual: campos opcionales */}
+          <div className="border-t border-zinc-800 pt-6">
+            <p className="text-xs text-zinc-500 mb-4">
+              Opcionales, pero si no los completas los inversores van a notarlo.
+            </p>
+
+            {/* Modelo de negocio */}
+            <div className="space-y-6">
+              <Field label="Modelo de negocio" error={errors.business_model}>
+                <textarea
+                  value={form.business_model}
+                  onChange={(e) => updateField("business_model", e.target.value)}
+                  maxLength={500}
+                  rows={2}
+                  className="form-input resize-none"
+                  placeholder="Como ganan o piensan ganar plata?"
+                />
+              </Field>
+
+              {/* Metricas */}
+              <Field label="Metricas" error={errors.metrics}>
+                <textarea
+                  value={form.metrics}
+                  onChange={(e) => updateField("metrics", e.target.value)}
+                  maxLength={500}
+                  rows={2}
+                  className="form-input resize-none"
+                  placeholder="Usuarios, revenue, traccion. Si no tenes, decilo."
+                />
+              </Field>
+
+              {/* Competidores */}
+              <Field label="Competidores" error={errors.competitors}>
+                <textarea
+                  value={form.competitors}
+                  onChange={(e) => updateField("competitors", e.target.value)}
+                  maxLength={500}
+                  rows={2}
+                  className="form-input resize-none"
+                  placeholder="Quienes hacen algo parecido y por que vos sos mejor?"
+                />
+              </Field>
+            </div>
+          </div>
 
           {/* Vertical y Stage en fila */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
