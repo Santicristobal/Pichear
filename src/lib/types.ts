@@ -31,6 +31,7 @@ export interface Evaluation {
   pitch_id: string;
   agent_type: AgentType;
   verdict: Verdict;
+  roast: string;
   justification: string;
   dimension_scores: Record<string, number>;
   created_at: string;
@@ -44,6 +45,7 @@ export interface Result {
   strengths: string[];
   weaknesses: string[];
   recommendation: string;
+  killer_quote: string;
   email: string | null;
   og_image_url: string | null;
   share_url: string;

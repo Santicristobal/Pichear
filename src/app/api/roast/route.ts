@@ -14,6 +14,7 @@ const MODEL = "google/gemini-2.0-flash-001";
 type AgentName = "skeptic" | "builder" | "strategist";
 
 interface AgentEvaluation {
+  roast: string;
   verdict: "INVEST" | "PASS" | "MORE_INFO";
   justification: string;
   dimension_scores: Record<string, number>;
@@ -25,6 +26,7 @@ interface MetaResult {
   strengths: string[];
   weaknesses: string[];
   recommendation: string;
+  killer_quote: string;
 }
 
 /**
@@ -88,6 +90,7 @@ async function parseAgentResponse(
       // Fallback: evaluación neutra
       console.error("Retry falló, usando fallback");
       return {
+        roast: "Los inversores se quedaron sin palabras. Eso nunca es buena señal.",
         verdict: "MORE_INFO",
         justification: "No se pudo generar una evaluación válida para este pitch.",
         dimension_scores: {},
@@ -124,6 +127,7 @@ async function parseMetaResponse(
         strengths: ["No se pudo generar análisis completo"],
         weaknesses: ["No se pudo generar análisis completo"],
         recommendation: "Hubo un error procesando las evaluaciones. Intentá de nuevo.",
+        killer_quote: "Hasta la IA se negó a opinar. Eso dice algo.",
       };
     }
   }
@@ -186,6 +190,7 @@ export async function POST(req: NextRequest) {
     const evalRows = agents.map((agent, i) => ({
       pitch_id: pitchId,
       agent_type: agent.name,
+      roast: evaluations[i].roast,
       verdict: evaluations[i].verdict,
       justification: evaluations[i].justification,
       dimension_scores: evaluations[i].dimension_scores,
@@ -210,6 +215,7 @@ export async function POST(req: NextRequest) {
         strengths: metaResult.strengths,
         weaknesses: metaResult.weaknesses,
         recommendation: metaResult.recommendation,
+        killer_quote: metaResult.killer_quote,
         share_url: `/pitch/${pitchId}/result`,
       })
       .select("id")
