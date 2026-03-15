@@ -135,8 +135,17 @@ export default async function ResultPage({ params }: PageProps) {
           {verdictBadge(result.approved)}
         </div>
 
+        {/* Killer quote */}
+        {result.killer_quote && (
+          <div className="mt-10 rounded-xl border border-zinc-700 bg-zinc-900 p-6 text-center">
+            <p className="text-lg italic text-zinc-200 leading-relaxed">
+              &ldquo;{result.killer_quote}&rdquo;
+            </p>
+          </div>
+        )}
+
         {/* Agent cards */}
-        <section className="mt-12 grid gap-4 sm:grid-cols-3">
+        <section className="mt-12 grid gap-6 sm:grid-cols-3">
           {sortedEvals.map((ev) => {
             const cfg = AGENT_CONFIG[ev.agent_type];
             return (
@@ -151,7 +160,13 @@ export default async function ResultPage({ params }: PageProps) {
 
                 <div className="mb-3">{agentVerdictBadge(ev.verdict)}</div>
 
-                <p className="mb-4 text-sm text-zinc-300">{ev.justification}</p>
+                {/* Roast (el párrafo con personalidad) */}
+                {ev.roast && (
+                  <p className="mb-4 text-sm leading-relaxed text-zinc-200">{ev.roast}</p>
+                )}
+
+                {/* Justificación fría debajo */}
+                <p className="mb-4 text-xs text-zinc-500 italic">{ev.justification}</p>
 
                 {/* Dimension scores as small bars */}
                 <div className="space-y-2">
