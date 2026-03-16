@@ -22,11 +22,12 @@ export default function ShareGate({
   });
 
   function handleShare(platform: "twitter" | "linkedin") {
-    const shareText = `Mi startup "${startupName}" fue al roast. Mira como le fue`;
+    const fullUrl = `https://pichear.vercel.app${shareUrl}`;
+    const shareText = `Mandé ${startupName} a que la destrozen 3 inversores de IA. Sobrevivió?`;
     const url =
       platform === "twitter"
-        ? `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`
-        : `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`;
+        ? `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(fullUrl)}`
+        : `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(fullUrl)}`;
 
     window.open(url, "_blank", "width=600,height=400");
     localStorage.setItem(storageKey, "true");

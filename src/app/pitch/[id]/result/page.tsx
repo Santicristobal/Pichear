@@ -25,13 +25,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title,
     openGraph: {
       title,
-      description: "Mirá cómo le fue a este startup en el roast.",
-      images: [{ url: `/api/og/${id}`, width: 1200, height: 630 }],
+      description: "Mandalo a que lo destrozen 3 inversores de IA.",
+      images: [{ url: `https://pichear.vercel.app/api/og/${id}`, width: 1200, height: 630 }],
     },
     twitter: {
       card: "summary_large_image",
       title,
-      images: [`/api/og/${id}`],
+      images: [`https://pichear.vercel.app/api/og/${id}`],
     },
   };
 }

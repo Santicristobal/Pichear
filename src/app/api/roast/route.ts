@@ -216,7 +216,7 @@ export async function POST(req: NextRequest) {
         weaknesses: metaResult.weaknesses,
         recommendation: metaResult.recommendation,
         killer_quote: metaResult.killer_quote,
-        share_url: `/pitch/${pitchId}/result`,
+        share_url: `https://pichear.vercel.app/pitch/${pitchId}/result`,
       })
       .select("id")
       .single();
