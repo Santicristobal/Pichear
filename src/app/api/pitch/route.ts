@@ -30,6 +30,20 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Verificar límite de intentos (máx 2 por nombre de startup)
+    const normalizedName = body.startup_name.trim().toLowerCase();
+    const { count, error: countError } = await supabase
+      .from("pitches")
+      .select("id", { count: "exact", head: true })
+      .ilike("startup_name", normalizedName);
+
+    if (!countError && count !== null && count >= 2) {
+      return NextResponse.json(
+        { error: "Esta startup ya fue evaluada 2 veces. El roast es final." },
+        { status: 429 }
+      );
+    }
+
     // Armar el objeto limpio con solo los campos esperados
     const pitchData: PitchFormData = {
       startup_name: body.startup_name.trim(),

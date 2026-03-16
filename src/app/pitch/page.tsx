@@ -90,7 +90,8 @@ export default function PitchPage() {
       });
 
       if (!pitchRes.ok) {
-        throw new Error("Error al enviar el pitch");
+        const errData = await pitchRes.json().catch(() => null);
+        throw new Error(errData?.error || "Error al enviar el pitch");
       }
 
       const { id } = await pitchRes.json();

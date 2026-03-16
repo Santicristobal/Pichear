@@ -89,10 +89,11 @@ export default async function ResultPage({ params }: PageProps) {
   const supabase = getSupabase();
 
   // Fetch all data in parallel
-  const [pitchRes, evalsRes, resultRes] = await Promise.all([
+  const [pitchRes, evalsRes, resultRes, totalRes] = await Promise.all([
     supabase.from("pitches").select("*").eq("id", id).single(),
     supabase.from("evaluations").select("*").eq("pitch_id", id),
     supabase.from("results").select("*").eq("pitch_id", id).single(),
+    supabase.from("results").select("id", { count: "exact", head: true }),
   ]);
 
   const pitch = pitchRes.data as Pitch | null;
@@ -115,6 +116,21 @@ export default async function ResultPage({ params }: PageProps) {
 
   const shareUrl = typeof result.share_url === "string" ? result.share_url : "";
 
+  // Calcular percentil
+  const totalCount = totalRes.count ?? 0;
+  let percentileText = "";
+  if (totalCount >= 5) {
+    // Contar cuántos tienen score menor
+    const { count: belowCount } = await supabase
+      .from("results")
+      .select("id", { count: "exact", head: true })
+      .lt("final_score", result.final_score);
+    if (belowCount !== null && totalCount > 0) {
+      const percentile = Math.round((belowCount / totalCount) * 100);
+      percentileText = `Top ${100 - percentile}% de ${totalCount} startups evaluadas`;
+    }
+  }
+
   return (
     <main className="min-h-screen bg-zinc-950 text-white">
       <div className="mx-auto max-w-3xl px-4 py-12">
@@ -130,6 +146,9 @@ export default async function ResultPage({ params }: PageProps) {
           </p>
           <p className="text-sm text-zinc-500">/100</p>
           {verdictBadge(result.approved)}
+          {percentileText && (
+            <p className="mt-2 text-sm text-zinc-500">{percentileText}</p>
+          )}
         </div>
 
         {/* Killer quote */}
