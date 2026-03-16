@@ -5,19 +5,32 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import type { PitchFormData } from "@/lib/types";
 
-const VERTICALS = ["Crypto", "AI", "Fintech", "Biotech", "SaaS", "Hardware", "Otro"];
+const VERTICALS = ["AI", "Fintech", "SaaS", "Crypto", "Marketplace", "Edtech", "Healthtech", "Climate/Energy", "Otra vertical"];
 const STAGES = ["Idea", "Pre-seed", "Seed", "Series A+"];
+const FOUNDERS_OPTIONS = [
+  { value: "solo", label: "Solo/a" },
+  { value: "duo", label: "2 cofounders" },
+  { value: "small_team", label: "3-4 personas" },
+  { value: "full_team", label: "5+ personas" },
+];
+const LOOKING_FOR_OPTIONS = [
+  { value: "feedback", label: "Feedback" },
+  { value: "investment", label: "Inversion" },
+  { value: "cofounders", label: "Cofounders" },
+  { value: "customers", label: "Clientes" },
+  { value: "just_roast", label: "Solo quiero el roast" },
+];
 
-// Reglas de validacion por campo
-const FIELD_CONFIG = {
+// Reglas de validacion por campo requerido
+const REQUIRED_FIELDS = {
   startup_name: { label: "Nombre de la startup", max: 100 },
-  oneliner: { label: "One-liner", max: 200 },
-  problem: { label: "Problema", max: 500 },
-  solution: { label: "Solucion", max: 500 },
-  team: { label: "Equipo", max: 300 },
+  oneliner: { label: "One-liner", max: 120 },
+  problem: { label: "Problema", max: 280 },
+  solution: { label: "Solucion", max: 280 },
+  target_user: { label: "Para quien es tu producto", max: 100 },
+  founders: { label: "Founders", max: 0 },
   vertical: { label: "Vertical", max: 0 },
   stage: { label: "Stage", max: 0 },
-  country: { label: "Pais", max: 0 },
 } as const;
 
 export default function PitchPage() {
@@ -28,10 +41,11 @@ export default function PitchPage() {
     oneliner: "",
     problem: "",
     solution: "",
-    team: "",
+    founders: "",
+    target_user: "",
     vertical: "",
     stage: "",
-    country: "Argentina",
+    looking_for: "",
     business_model: "",
     metrics: "",
     competitors: "",
@@ -41,10 +55,8 @@ export default function PitchPage() {
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState("");
 
-  // Actualiza un campo del form
   function updateField(field: keyof PitchFormData, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));
-    // Limpia el error del campo cuando el usuario escribe
     if (errors[field]) {
       setErrors((prev) => {
         const next = { ...prev };
@@ -54,11 +66,10 @@ export default function PitchPage() {
     }
   }
 
-  // Validacion client-side: todos los campos son requeridos
   function validate(): boolean {
     const newErrors: Partial<Record<keyof PitchFormData, string>> = {};
 
-    for (const [key, config] of Object.entries(FIELD_CONFIG)) {
+    for (const [key, config] of Object.entries(REQUIRED_FIELDS)) {
       const field = key as keyof PitchFormData;
       const value = form[field].trim();
 
@@ -82,7 +93,6 @@ export default function PitchPage() {
     setLoading(true);
 
     try {
-      // 1. Crear el pitch
       const pitchRes = await fetch("/api/pitch", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -96,26 +106,14 @@ export default function PitchPage() {
 
       const { id } = await pitchRes.json();
 
-      // 2. Generar el roast
-      const roastRes = await fetch("/api/roast", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pitchId: id }),
-      });
-
-      if (!roastRes.ok) {
-        throw new Error("Error al generar el roast");
-      }
-
-      // 3. Redirigir al resultado
-      router.push(`/pitch/${id}/result`);
+      // Redirigir al Q&A con los agentes
+      router.push(`/pitch/${id}/questions`);
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : "Algo salio mal");
       setLoading(false);
     }
   }
 
-  // Estado de carga con animacion
   if (loading) {
     return (
       <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
@@ -123,8 +121,7 @@ export default function PitchPage() {
           <div className="mb-6 flex justify-center">
             <div className="h-12 w-12 rounded-full border-4 border-zinc-700 border-t-red-500 animate-spin" />
           </div>
-          <p className="text-zinc-300 text-lg">Los inversores estan deliberando...</p>
-          <p className="text-zinc-500 text-sm mt-2">Esto puede tomar unos segundos</p>
+          <p className="text-zinc-300 text-lg">Guardando tu pitch...</p>
         </div>
       </div>
     );
@@ -152,7 +149,6 @@ export default function PitchPage() {
               onChange={(e) => updateField("startup_name", e.target.value)}
               maxLength={100}
               className="form-input"
-              placeholder="Acme Inc."
             />
           </Field>
 
@@ -162,9 +158,9 @@ export default function PitchPage() {
               type="text"
               value={form.oneliner}
               onChange={(e) => updateField("oneliner", e.target.value)}
-              maxLength={200}
+              maxLength={120}
               className="form-input"
-              placeholder="En una frase, que hace tu startup?"
+              placeholder="Que haces en una oracion. Ej: Uber para mascotas"
             />
           </Field>
 
@@ -173,10 +169,10 @@ export default function PitchPage() {
             <textarea
               value={form.problem}
               onChange={(e) => updateField("problem", e.target.value)}
-              maxLength={500}
+              maxLength={280}
               rows={3}
               className="form-input resize-none"
-              placeholder="Que problema resuelve?"
+              placeholder="Que problema resuelven y para quien. Se breve."
             />
           </Field>
 
@@ -185,72 +181,40 @@ export default function PitchPage() {
             <textarea
               value={form.solution}
               onChange={(e) => updateField("solution", e.target.value)}
-              maxLength={500}
+              maxLength={280}
               rows={3}
               className="form-input resize-none"
-              placeholder="Como lo resuelve?"
+              placeholder="Como lo resuelven. Sin buzzwords."
             />
           </Field>
 
-          {/* Equipo */}
-          <Field label="Equipo" error={errors.team}>
-            <textarea
-              value={form.team}
-              onChange={(e) => updateField("team", e.target.value)}
-              maxLength={300}
-              rows={2}
-              className="form-input resize-none"
-              placeholder="Quienes forman el equipo?"
+          {/* Para quien */}
+          <Field label="Para quien es tu producto?" error={errors.target_user}>
+            <input
+              type="text"
+              value={form.target_user}
+              onChange={(e) => updateField("target_user", e.target.value)}
+              maxLength={100}
+              className="form-input"
+              placeholder="Ej: Pymes de LATAM con +10 empleados"
             />
           </Field>
 
-          {/* Separador visual: campos opcionales */}
-          <div className="border-t border-zinc-800 pt-6">
-            <p className="text-xs text-zinc-500 mb-4">
-              Opcionales, pero si no los completas los inversores van a notarlo.
-            </p>
+          {/* Founders, Vertical, Stage en grilla */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <Field label="Founders" error={errors.founders}>
+              <select
+                value={form.founders}
+                onChange={(e) => updateField("founders", e.target.value)}
+                className="form-input"
+              >
+                <option value="">Seleccionar...</option>
+                {FOUNDERS_OPTIONS.map((f) => (
+                  <option key={f.value} value={f.value}>{f.label}</option>
+                ))}
+              </select>
+            </Field>
 
-            {/* Modelo de negocio */}
-            <div className="space-y-6">
-              <Field label="Modelo de negocio" error={errors.business_model}>
-                <textarea
-                  value={form.business_model}
-                  onChange={(e) => updateField("business_model", e.target.value)}
-                  maxLength={500}
-                  rows={2}
-                  className="form-input resize-none"
-                  placeholder="Como ganan o piensan ganar plata?"
-                />
-              </Field>
-
-              {/* Metricas */}
-              <Field label="Metricas" error={errors.metrics}>
-                <textarea
-                  value={form.metrics}
-                  onChange={(e) => updateField("metrics", e.target.value)}
-                  maxLength={500}
-                  rows={2}
-                  className="form-input resize-none"
-                  placeholder="Usuarios, revenue, traccion. Si no tenes, decilo."
-                />
-              </Field>
-
-              {/* Competidores */}
-              <Field label="Competidores" error={errors.competitors}>
-                <textarea
-                  value={form.competitors}
-                  onChange={(e) => updateField("competitors", e.target.value)}
-                  maxLength={500}
-                  rows={2}
-                  className="form-input resize-none"
-                  placeholder="Quienes hacen algo parecido y por que vos sos mejor?"
-                />
-              </Field>
-            </div>
-          </div>
-
-          {/* Vertical y Stage en fila */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <Field label="Vertical" error={errors.vertical}>
               <select
                 value={form.vertical}
@@ -278,15 +242,60 @@ export default function PitchPage() {
             </Field>
           </div>
 
-          {/* Pais */}
-          <Field label="Pais" error={errors.country}>
-            <input
-              type="text"
-              value={form.country}
-              onChange={(e) => updateField("country", e.target.value)}
-              className="form-input"
-            />
-          </Field>
+          {/* Separador: campos opcionales */}
+          <div className="border-t border-zinc-800 pt-6">
+            <p className="text-sm text-zinc-400 mb-4 italic">
+              Si no lo completas, los inversores van a asumir lo peor.
+            </p>
+
+            <div className="space-y-6">
+              <Field label="Modelo de negocio" error={errors.business_model}>
+                <textarea
+                  value={form.business_model}
+                  onChange={(e) => updateField("business_model", e.target.value)}
+                  maxLength={200}
+                  rows={2}
+                  className="form-input resize-none"
+                  placeholder="Como ganan o van a ganar plata?"
+                />
+              </Field>
+
+              <Field label="Metricas" error={errors.metrics}>
+                <textarea
+                  value={form.metrics}
+                  onChange={(e) => updateField("metrics", e.target.value)}
+                  maxLength={200}
+                  rows={2}
+                  className="form-input resize-none"
+                  placeholder="Usuarios, revenue, crecimiento. Numeros concretos."
+                />
+              </Field>
+
+              <Field label="Competidores" error={errors.competitors}>
+                <textarea
+                  value={form.competitors}
+                  onChange={(e) => updateField("competitors", e.target.value)}
+                  maxLength={200}
+                  rows={2}
+                  className="form-input resize-none"
+                  placeholder="Quienes son y por que sos diferente."
+                />
+              </Field>
+
+              <Field label="Que estas buscando?" error={errors.looking_for}>
+                <select
+                  value={form.looking_for}
+                  onChange={(e) => updateField("looking_for", e.target.value)}
+                  className="form-input"
+                >
+                  <option value="">Seleccionar...</option>
+                  {LOOKING_FOR_OPTIONS.map((l) => (
+                    <option key={l.value} value={l.value}>{l.label}</option>
+                  ))}
+                </select>
+              </Field>
+            </div>
+          </div>
 
           {/* Error general */}
           {submitError && (
@@ -296,9 +305,10 @@ export default function PitchPage() {
           {/* Submit */}
           <button
             type="submit"
-            className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-xl transition-colors"
+            disabled={loading}
+            className="w-full bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-xl transition-colors"
           >
-            Enviar Pitch
+            Pichear
           </button>
         </form>
       </div>
@@ -306,7 +316,6 @@ export default function PitchPage() {
   );
 }
 
-// Componente auxiliar para cada campo del form
 function Field({
   label,
   error,

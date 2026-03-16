@@ -156,6 +156,19 @@ export async function POST(req: NextRequest) {
 
     const pitchText = formatPitchAsText(pitch);
 
+    // Leer preguntas y respuestas del Q&A (si existen)
+    const { data: qaData } = await supabase
+      .from("questions")
+      .select("agent_type, question, answer")
+      .eq("pitch_id", pitchId);
+
+    const qaByAgent: Record<string, { question: string; answer: string }> = {};
+    if (qaData) {
+      for (const row of qaData) {
+        qaByAgent[row.agent_type] = { question: row.question, answer: row.answer || "(sin respuesta)" };
+      }
+    }
+
     // Llamadas paralelas a los 3 agentes
     const agents: { name: AgentName; prompt: string }[] = [
       { name: "skeptic", prompt: SKEPTIC_PROMPT },
@@ -164,7 +177,15 @@ export async function POST(req: NextRequest) {
     ];
 
     const rawResponses = await Promise.all(
-      agents.map((agent) => callOpenRouter(agent.prompt, pitchText))
+      agents.map((agent) => {
+        let message = pitchText;
+        // Agregar contexto de Q&A si existe
+        const qa = qaByAgent[agent.name];
+        if (qa) {
+          message += `\n\n--- Q&A ---\nLe preguntaste: "${qa.question}"\nRespondió: "${qa.answer}"`;
+        }
+        return callOpenRouter(agent.prompt, message);
+      })
     );
 
     // Parsear las 3 respuestas (con retry si falla)

@@ -1,11 +1,22 @@
 export type Vertical =
-  | "Crypto"
   | "AI"
   | "Fintech"
-  | "Biotech"
   | "SaaS"
-  | "Hardware"
-  | "Otro";
+  | "Crypto"
+  | "Marketplace"
+  | "Edtech"
+  | "Healthtech"
+  | "Climate/Energy"
+  | "Otra vertical";
+
+export type Founders = "solo" | "duo" | "small_team" | "full_team";
+
+export type LookingFor =
+  | "feedback"
+  | "investment"
+  | "cofounders"
+  | "customers"
+  | "just_roast";
 
 export type Stage = "Idea" | "Pre-seed" | "Seed" | "Series A+";
 
@@ -19,10 +30,11 @@ export interface Pitch {
   oneliner: string;
   problem: string;
   solution: string;
-  team: string;
+  founders: Founders;
+  target_user: string;
   vertical: Vertical;
   stage: Stage;
-  country: string;
+  looking_for: LookingFor | null;
   business_model: string;
   metrics: string;
   competitors: string;
@@ -60,11 +72,21 @@ export interface PitchFormData {
   oneliner: string;
   problem: string;
   solution: string;
-  team: string;
+  founders: Founders | "";
+  target_user: string;
   vertical: Vertical | "";
   stage: Stage | "";
-  country: string;
+  looking_for: LookingFor | "";
   business_model: string;
   metrics: string;
   competitors: string;
+}
+
+export interface Question {
+  id: string;
+  pitch_id: string;
+  agent_type: AgentType;
+  question: string;
+  answer: string | null;
+  created_at: string;
 }

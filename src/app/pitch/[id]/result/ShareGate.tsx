@@ -39,38 +39,34 @@ export default function ShareGate({
   }
 
   return (
-    <div className="mt-12">
-      {/* Blurred preview */}
-      <div className="relative">
-        <div className="pointer-events-none select-none blur-md opacity-40">
-          {children}
+    <div className="mt-4 sm:mt-10">
+      {/* CTA card */}
+      <div className="rounded-2xl border border-zinc-700 bg-zinc-900 p-6 sm:p-8 text-center max-w-md mx-auto">
+        <p className="text-lg font-bold text-white mb-2">
+          Comparti tu resultado para ver el feedback completo
+        </p>
+        <p className="text-sm text-zinc-400 mb-6">
+          Los roasts completos de los 3 inversores, fortalezas, debilidades y recomendacion.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <button
+            onClick={() => handleShare("twitter")}
+            className="rounded-lg bg-white px-6 py-2.5 text-sm font-semibold text-black hover:bg-zinc-200 transition-colors"
+          >
+            Compartir en Twitter
+          </button>
+          <button
+            onClick={() => handleShare("linkedin")}
+            className="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 transition-colors"
+          >
+            Compartir en LinkedIn
+          </button>
         </div>
+      </div>
 
-        {/* Overlay con CTA */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="rounded-2xl border border-zinc-700 bg-zinc-900/95 p-8 text-center max-w-md mx-4">
-            <p className="text-lg font-bold text-white mb-2">
-              Comparti tu resultado para ver el feedback completo
-            </p>
-            <p className="text-sm text-zinc-400 mb-6">
-              Los roasts completos de los 3 inversores, fortalezas, debilidades y recomendacion.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <button
-                onClick={() => handleShare("twitter")}
-                className="rounded-lg bg-white px-6 py-2.5 text-sm font-semibold text-black hover:bg-zinc-200 transition-colors"
-              >
-                Compartir en Twitter
-              </button>
-              <button
-                onClick={() => handleShare("linkedin")}
-                className="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 transition-colors"
-              >
-                Compartir en LinkedIn
-              </button>
-            </div>
-          </div>
-        </div>
+      {/* Blurred preview */}
+      <div className="pointer-events-none select-none blur-md opacity-40 max-h-48 overflow-hidden mt-6">
+        {children}
       </div>
     </div>
   );

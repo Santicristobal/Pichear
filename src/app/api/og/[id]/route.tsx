@@ -2,6 +2,7 @@ import { ImageResponse } from "next/og";
 import { getSupabase } from "@/lib/supabase";
 
 export const runtime = "edge";
+export const dynamic = "force-dynamic";
 
 export async function GET(
   _request: Request,
@@ -72,7 +73,7 @@ export async function GET(
             maxWidth: "90%",
           }}
         >
-          &ldquo;{displayQuote}&rdquo;
+          {"\u201C"}{displayQuote}{"\u201D"}
         </div>
 
         {/* CTA */}
@@ -83,7 +84,7 @@ export async function GET(
             fontWeight: 600,
           }}
         >
-          Mira como le fue &rarr;
+          Mira como le fue {"\u2192"}
         </div>
 
         {/* Branding */}
@@ -96,7 +97,7 @@ export async function GET(
             fontWeight: 600,
           }}
         >
-          Roast My Startup
+          Pichear
         </div>
       </div>
     ),

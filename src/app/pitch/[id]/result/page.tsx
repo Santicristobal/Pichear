@@ -18,8 +18,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     .single();
 
   const title = pitch
-    ? `${pitch.startup_name} — Roast My Startup`
-    : "Roast My Startup";
+    ? `${pitch.startup_name} — Pichear`
+    : "Pichear";
 
   return {
     title,
@@ -40,11 +40,27 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 const AGENT_CONFIG: Record<
   Evaluation["agent_type"],
-  { label: string; emoji: string; color: string }
+  { label: string; labelEs: string; emoji: string; color: string }
 > = {
-  skeptic: { label: "The Skeptic", emoji: "\uD83D\uDD0D", color: "border-red-500" },
-  builder: { label: "The Builder", emoji: "\uD83D\uDD27", color: "border-amber-500" },
-  strategist: { label: "The Strategist", emoji: "\u265F\uFE0F", color: "border-blue-500" },
+  skeptic: { label: "The Skeptic", labelEs: "La Esceptica", emoji: "\uD83E\uDDD0", color: "border-red-500" },
+  builder: { label: "The Builder", labelEs: "El Constructor", emoji: "\uD83D\uDD27", color: "border-blue-500" },
+  strategist: { label: "The Strategist", labelEs: "La Estratega", emoji: "\u265F\uFE0F", color: "border-purple-500" },
+};
+
+// Mapeo de dimension keys a nombres en espanol
+const DIMENSION_NAMES: Record<string, string> = {
+  market_size: "Tamano de mercado",
+  business_model: "Modelo de negocio",
+  competition: "Competencia",
+  unit_economics: "Unit economics",
+  product_vision: "Vision de producto",
+  technical_feasibility: "Factibilidad tecnica",
+  execution_capability: "Capacidad de ejecucion",
+  mvp_quality: "Calidad del MVP",
+  timing: "Timing",
+  narrative: "Narrativa",
+  scalability: "Escalabilidad",
+  defensibility: "Defensibilidad",
 };
 
 // --- Helpers ---
@@ -133,28 +149,28 @@ export default async function ResultPage({ params }: PageProps) {
 
   return (
     <main className="min-h-screen bg-zinc-950 text-white">
-      <div className="mx-auto max-w-3xl px-4 py-12">
+      <div className="mx-auto max-w-3xl px-4 py-6 sm:py-12">
         {/* Header */}
-        <h1 className="text-center text-3xl font-bold sm:text-4xl">
+        <h1 className="text-center text-2xl font-bold sm:text-4xl">
           {pitch.startup_name}
         </h1>
 
         {/* Score + verdict */}
-        <div className="mt-8 flex flex-col items-center gap-3">
-          <p className={`text-8xl font-black ${scoreColor(result.final_score)}`}>
+        <div className="mt-4 sm:mt-8 flex flex-col items-center gap-2">
+          <p className={`text-6xl sm:text-8xl font-black ${scoreColor(result.final_score)}`}>
             {result.final_score}
           </p>
           <p className="text-sm text-zinc-500">/100</p>
           {verdictBadge(result.approved)}
           {percentileText && (
-            <p className="mt-2 text-sm text-zinc-500">{percentileText}</p>
+            <p className="mt-1 text-sm text-zinc-500">{percentileText}</p>
           )}
         </div>
 
         {/* Killer quote */}
         {result.killer_quote && (
-          <div className="mt-10 rounded-xl border border-zinc-700 bg-zinc-900 p-6 text-center">
-            <p className="text-lg italic text-zinc-200 leading-relaxed">
+          <div className="mt-4 sm:mt-10 rounded-xl border border-zinc-700 bg-zinc-900 p-4 sm:p-6 text-center">
+            <p className="text-base sm:text-lg italic text-zinc-200 leading-relaxed">
               &ldquo;{result.killer_quote}&rdquo;
             </p>
           </div>
@@ -173,7 +189,10 @@ export default async function ResultPage({ params }: PageProps) {
                 >
                   <div className="mb-3 flex items-center gap-2">
                     <span className="text-2xl">{cfg.emoji}</span>
-                    <h3 className="font-bold">{cfg.label}</h3>
+                    <div>
+                      <h3 className="font-bold">{cfg.label}</h3>
+                      <p className="text-xs text-zinc-500">{cfg.labelEs}</p>
+                    </div>
                   </div>
 
                   <div className="mb-3">{agentVerdictBadge(ev.verdict)}</div>
@@ -188,7 +207,7 @@ export default async function ResultPage({ params }: PageProps) {
                     {Object.entries(ev.dimension_scores).map(([dim, score]) => (
                       <div key={dim}>
                         <div className="mb-0.5 flex justify-between text-xs text-zinc-400">
-                          <span className="capitalize">{dim.replace(/_/g, " ")}</span>
+                          <span>{DIMENSION_NAMES[dim] || dim.replace(/_/g, " ")}</span>
                           <span>{score}/10</span>
                         </div>
                         <div className="h-1.5 w-full rounded-full bg-zinc-700">

@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Roast My Startup",
+  title: "Pichear — 3 inversores AI. 0 piedad.",
   description:
-    "Pitchea tu startup a 3 VCs de IA. Si sobrevivís al roast, te conectamos con inversores reales.",
+    "Pitchea tu startup a 3 inversores de IA. Te van a destruir. Pero vas a aprender.",
 };
 
 export default function RootLayout({

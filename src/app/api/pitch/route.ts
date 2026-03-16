@@ -7,10 +7,10 @@ const REQUIRED_FIELDS: (keyof PitchFormData)[] = [
   "oneliner",
   "problem",
   "solution",
-  "team",
+  "target_user",
+  "founders",
   "vertical",
   "stage",
-  "country",
 ];
 
 export async function POST(req: NextRequest) {
@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
-    // Validar que todos los campos requeridos estén presentes y no vacíos
+    // Validar campos requeridos
     const missing = REQUIRED_FIELDS.filter(
       (field) => !body[field] || typeof body[field] !== "string" || !body[field].trim()
     );
@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Verificar límite de intentos (máx 2 por nombre de startup)
+    // Verificar limite de intentos (max 2 por nombre de startup)
     const normalizedName = body.startup_name.trim().toLowerCase();
     const { count, error: countError } = await supabase
       .from("pitches")
@@ -44,16 +44,17 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Armar el objeto limpio con solo los campos esperados
+    // Armar objeto limpio
     const pitchData: PitchFormData = {
       startup_name: body.startup_name.trim(),
       oneliner: body.oneliner.trim(),
       problem: body.problem.trim(),
       solution: body.solution.trim(),
-      team: body.team.trim(),
+      target_user: body.target_user.trim(),
+      founders: body.founders.trim(),
       vertical: body.vertical.trim(),
       stage: body.stage.trim(),
-      country: body.country.trim(),
+      looking_for: (body.looking_for || "").trim() || null,
       business_model: (body.business_model || "").trim(),
       metrics: (body.metrics || "").trim(),
       competitors: (body.competitors || "").trim(),
