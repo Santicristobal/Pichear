@@ -22,8 +22,8 @@ export default function ShareGate({
   });
 
   function handleShare(platform: "twitter" | "linkedin") {
-    const fullUrl = `https://pichear.vercel.app${shareUrl}`;
-    const shareText = `Mandé ${startupName} a que la destrozen 3 inversores de IA. Sobrevivió?`;
+    const fullUrl = shareUrl.startsWith("http") ? shareUrl : `https://pichear.vercel.app${shareUrl}`;
+    const shareText = `Mandé ${startupName} a que la destrozen 3 inversores de IA. Sobrevivió?\n`;
     const url =
       platform === "twitter"
         ? `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(fullUrl)}`
