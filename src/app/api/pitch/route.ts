@@ -58,6 +58,8 @@ export async function POST(req: NextRequest) {
       business_model: (body.business_model || "").trim(),
       metrics: (body.metrics || "").trim(),
       competitors: (body.competitors || "").trim(),
+      contact_email: (body.contact_email || "").trim() || null,
+      contact_social: (body.contact_social || "").trim() || null,
     };
 
     const { data, error } = await supabase

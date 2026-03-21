@@ -49,6 +49,8 @@ export default function PitchPage() {
     business_model: "",
     metrics: "",
     competitors: "",
+    contact_email: "",
+    contact_social: "",
   });
 
   const [errors, setErrors] = useState<Partial<Record<keyof PitchFormData, string>>>({});
@@ -293,6 +295,37 @@ export default function PitchPage() {
                     <option key={l.value} value={l.value}>{l.label}</option>
                   ))}
                 </select>
+              </Field>
+            </div>
+          </div>
+
+          {/* Datos de contacto */}
+          <div className="border-t border-zinc-800 pt-6">
+            <p className="text-sm text-zinc-400 mb-4">
+              Si dejas tus datos de contacto, podemos conectarte con inversores, mentores u oportunidades relevantes para tu startup.
+            </p>
+
+            <div className="space-y-6">
+              <Field label="Email de contacto">
+                <input
+                  type="email"
+                  value={form.contact_email}
+                  onChange={(e) => updateField("contact_email", e.target.value)}
+                  maxLength={150}
+                  className="form-input"
+                  placeholder="founder@tustartup.com"
+                />
+              </Field>
+
+              <Field label="Twitter / LinkedIn">
+                <input
+                  type="text"
+                  value={form.contact_social}
+                  onChange={(e) => updateField("contact_social", e.target.value)}
+                  maxLength={200}
+                  className="form-input"
+                  placeholder="@handle o URL de tu perfil"
+                />
               </Field>
             </div>
           </div>

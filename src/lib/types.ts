@@ -38,6 +38,8 @@ export interface Pitch {
   business_model: string;
   metrics: string;
   competitors: string;
+  contact_email: string | null;
+  contact_social: string | null;
   created_at: string;
 }
 
@@ -80,6 +82,8 @@ export interface PitchFormData {
   business_model: string;
   metrics: string;
   competitors: string;
+  contact_email: string;
+  contact_social: string;
 }
 
 export interface Question {
